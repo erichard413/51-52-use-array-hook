@@ -1,38 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 
 function useArray(array) {
   const [arr, setArr] = useState(array);
 
-  const push = element => {
-    const arrCopy = [...arr];
-    arrCopy.push(element);
-    setArr(arrCopy);
-  };
+  // const push = element => {
+  //   setArr(arr => [...arr, element]);
+  // };
+  // re-formated to useCallback hook - this will ensure that the function is not recreated on every re-render
+  const push = useCallback(element => {
+    setArr(arr => [...arr, element]);
+  }, []);
 
-  const replace = (idx, element) => {
-    const arrCopy = [...arr];
-    arrCopy.splice(idx, 0, element);
-    setArr(arrCopy);
-  };
+  const replace = useCallback((idx, element) => {
+    setArr(arr => {
+      return [...arr.slice(0, idx), element, ...arr.slice(idx + 1)];
+    });
+  }, []);
 
-  const filter = f => {
-    const arrCopy = [...arr];
-    setArr(arrCopy.filter(item => f(item)));
-  };
+  const filter = useCallback(f => {
+    setArr(arr => {
+      return arr.filter(f);
+    });
+  }, []);
 
-  const remove = idx => {
-    const arrCopy = [...arr];
-    arrCopy.splice(idx, 1);
-    setArr(arrCopy);
-  };
+  const remove = useCallback(idx => {
+    setArr(arr => {
+      return [...arr.slice(0, idx), ...arr.slice(idx + 1)];
+    });
+  }, []);
 
-  const clear = () => {
+  const clear = useCallback(() => {
     setArr([]);
-  };
+  }, []);
 
-  const reset = array => {
-    setArr(array);
-  };
+  const reset = useCallback(
+    array => {
+      setArr(array);
+    },
+    [array]
+  );
 
   return {
     array: arr,
